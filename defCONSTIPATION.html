@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>defCONSTIPATION // Constipation Readiness Condition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&family=Oswald:wght@500;600;700&family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070b0a; --bg2:#0b110f;
+    --panel:#101816; --panel2:#0c1311; --line:#203029;
+    --ink:#dbe6e1; --mute:#8aa39a; --faint:#5c726a;
+    --amber:#ffc24d; --amber2:#ffe0a3;
+    --blue:#3fa7ff; --green:#3ed676; --yellow:#ffd23f; --red:#ff4d4d; --white:#f4f8f6;
+    --danger:#ff3b3b;
+    --lvl:var(--amber);
+    --stencil:"Saira Stencil One", system-ui; --head:"Oswald", sans-serif;
+    --mono:"Share Tech Mono", monospace; --body:"Barlow", sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(1200px 700px at 80% -10%, rgba(63,167,255,.06), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(62,214,118,.05), transparent 60%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    color:var(--ink); font-family:var(--body);
+    overflow:hidden; position:relative;
+  }
+  /* faint command-grid + scanlines */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.5;
+    background-image:
+      linear-gradient(rgba(120,170,150,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120,170,150,.05) 1px, transparent 1px);
+    background-size:46px 46px;
+    mask:radial-gradient(120% 120% at 50% 40%, #000 55%, transparent 100%);
+  }
+  body::after{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:60; opacity:.35;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px);
+    mix-blend-mode:multiply;
+  }
+
+  .app{position:relative; z-index:2; height:100vh; display:flex; flex-direction:column; padding:14px 16px 12px}
+
+  /* ---------- top bar ---------- */
+  .topbar{display:flex; align-items:center; gap:14px; padding-bottom:10px; border-bottom:1px solid var(--line)}
+  .brand{font-family:var(--stencil); letter-spacing:.5px; font-size:20px; line-height:1; color:var(--amber); white-space:nowrap}
+  .brand b{color:#fff}
+  .brand .def{color:var(--amber)}
+  .sysline{font-family:var(--mono); font-size:11px; color:var(--faint); letter-spacing:1px; text-transform:uppercase}
+  .topbar .spacer{flex:1}
+  .stat{font-family:var(--mono); font-size:11px; color:var(--mute); display:flex; gap:14px; align-items:center}
+  .stat .dot{width:8px;height:8px;border-radius:50%;background:var(--lvl);box-shadow:0 0 10px var(--lvl);animation:blip 1.6s infinite}
+  .counter{font-family:var(--mono); font-size:12px; color:var(--amber2); border:1px solid var(--line); padding:3px 8px; border-radius:4px; background:var(--panel2)}
+  @keyframes blip{0%,100%{opacity:1}50%{opacity:.25}}
+
+  /* ---------- console body ---------- */
+  .console{flex:1; display:flex; gap:16px; min-height:0; padding-top:12px}
+
+  /* readiness ladder */
+  .ladder{width:120px; display:flex; flex-direction:column; gap:8px; padding:4px}
+  .ladder .lbl{font-family:var(--mono); font-size:10px; letter-spacing:1.5px; color:var(--faint); text-align:center; text-transform:uppercase; margin-bottom:2px}
+  .rung{position:relative; flex:1; border:1px solid var(--rc); border-radius:7px; background:linear-gradient(180deg, color-mix(in srgb, var(--rc) 12%, transparent), transparent); color:var(--rc); cursor:pointer; opacity:.32; transition:.25s; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden}
+  .rung .n{font-family:var(--stencil); font-size:30px; line-height:.9}
+  .rung .t{font-family:var(--mono); font-size:8.5px; letter-spacing:1px; text-transform:uppercase; opacity:.85}
+  .rung:hover{opacity:.7}
+  .rung.on{opacity:1; box-shadow:0 0 0 1px var(--rc), 0 0 24px -2px var(--rc); background:linear-gradient(180deg, color-mix(in srgb, var(--rc) 26%, transparent), color-mix(in srgb, var(--rc) 6%, transparent))}
+  .rung.on::after{content:""; position:absolute; left:0; right:0; height:30%; top:-30%; background:linear-gradient(180deg, color-mix(in srgb,var(--rc) 55%, transparent), transparent); animation:sweep 1.8s ease-in-out infinite}
+  @keyframes sweep{0%{top:-32%}100%{top:120%}}
+
+  /* stage */
+  .stage{flex:1; position:relative; border:1px solid var(--line); border-radius:12px; background:
+      radial-gradient(900px 500px at 78% -10%, color-mix(in srgb, var(--lvl) 9%, transparent), transparent 60%),
+      linear-gradient(180deg,var(--panel),var(--panel2));
+      overflow:hidden; min-width:0}
+  .stage::before{ /* corner stencil + radar */
+    content:""; position:absolute; right:-120px; top:-120px; width:360px; height:360px; border-radius:50%;
+    background:conic-gradient(from 0deg, color-mix(in srgb,var(--lvl) 30%, transparent), transparent 28%);
+    opacity:.10; animation:radar 7s linear infinite;
+  }
+  @keyframes radar{to{transform:rotate(360deg)}}
+  .stage .corner-code{position:absolute; right:14px; bottom:10px; font-family:var(--mono); font-size:10px; color:var(--faint); letter-spacing:2px; opacity:.6; z-index:5}
+
+  .slide{position:absolute; inset:0; display:none; padding:22px 40px; overflow:auto}
+  .slide.active{display:flex; flex-direction:column}
+  .slide.in [data-anim]{animation:rise .6s cubic-bezier(.2,.8,.2,1) both; animation-delay:var(--d,0s)}
+  @keyframes rise{from{opacity:0; transform:translateY(16px)}to{opacity:1; transform:none}}
+
+  .kicker{font-family:var(--mono); font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--lvl)}
+  .codeline{font-family:var(--mono); font-size:11px; color:var(--mute); letter-spacing:1px; margin-top:2px}
+  .codeline b{color:var(--lvl)}
+
+  /* level header block */
+  .lvlhead{display:flex; align-items:center; gap:26px; margin:4px 0 14px}
+  .bignum{position:relative; font-family:var(--stencil); font-size:140px; line-height:.8; color:var(--lvl); text-shadow:0 0 40px color-mix(in srgb,var(--lvl) 60%, transparent)}
+  .bignum::after{content:""; position:absolute; inset:-26px; border-radius:50%; border:2px solid color-mix(in srgb,var(--lvl) 55%, transparent); animation:klax var(--kx,2.4s) ease-in-out infinite}
+  @keyframes klax{0%,100%{transform:scale(.86);opacity:.15}50%{transform:scale(1.08);opacity:.7}}
+  .lvltitle{font-family:var(--head); text-transform:uppercase; font-weight:700; font-size:38px; line-height:1; letter-spacing:.5px}
+  .lvltitle small{display:block; font-family:var(--body); font-weight:500; text-transform:none; letter-spacing:0; font-size:16px; color:var(--mute); margin-top:8px; max-width:560px}
+
+  /* content grid */
+  .grid{display:grid; grid-template-columns:1.15fr .85fr; gap:22px; flex:0 0 auto; min-height:0}
+  .grid.one{grid-template-columns:1fr}
+  .col{display:flex; flex-direction:column; gap:12px; min-width:0}
+
+  .card{border:1px solid var(--line); border-left:3px solid var(--lvl); border-radius:9px; background:linear-gradient(180deg, color-mix(in srgb,var(--lvl) 6%, var(--panel2)), var(--panel2)); padding:13px 15px}
+  .card h3{font-family:var(--head); text-transform:uppercase; letter-spacing:.4px; font-size:17px; display:flex; align-items:center; gap:10px}
+  .card h3 .dose{font-family:var(--mono); font-size:11px; color:var(--amber2); background:rgba(255,194,77,.12); border:1px solid rgba(255,194,77,.3); padding:2px 7px; border-radius:20px; letter-spacing:.5px; white-space:nowrap}
+  .card p{font-size:14.5px; color:var(--ink); margin-top:6px; line-height:1.42}
+  .card p .hl{color:var(--lvl); font-weight:600}
+  .card.warn{border-left-color:var(--danger); background:linear-gradient(180deg, rgba(255,59,59,.08), var(--panel2))}
+  .card.warn h3{color:#ff9a9a}
+  .card.ban{border-left-color:#ff6a6a}
+
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:9px}
+  .chip{font-family:var(--mono); font-size:10.5px; letter-spacing:.3px; color:var(--amber2); border:1px solid rgba(255,194,77,.32); background:rgba(255,194,77,.08); padding:3px 8px; border-radius:5px; cursor:default}
+  .chip.ev{color:#bfe9cd; border-color:rgba(62,214,118,.32); background:rgba(62,214,118,.08)}
+  .chip.bad{color:#ffb3b3; border-color:rgba(255,77,77,.34); background:rgba(255,77,77,.09)}
+
+  .joke{margin-top:auto; font-family:var(--mono); font-size:13px; color:var(--amber2); border-top:1px dashed var(--line); padding-top:10px}
+  .joke::before{content:"// "; color:var(--faint)}
+
+  .redflags{font-family:var(--mono); font-size:11.5px; color:#ffc9c9; display:flex; flex-wrap:wrap; gap:6px; margin-top:4px}
+  .redflags span{border:1px solid rgba(255,77,77,.3); background:rgba(255,77,77,.07); padding:2px 7px; border-radius:4px}
+
+  /* visual panel */
+  .viz{border:1px solid var(--line); border-radius:9px; background:var(--panel2); padding:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; position:relative; overflow:hidden}
+  .viz .cap{font-family:var(--mono); font-size:10.5px; color:var(--mute); letter-spacing:.5px; text-align:center}
+  .viz.split{display:grid; grid-template-columns:1fr 1fr; place-items:center; gap:10px}
+  .viz.split > div{display:flex; flex-direction:column; align-items:center; gap:6px}
+
+  .ytbtn{font-family:var(--mono); font-size:12px; letter-spacing:.5px; color:#0a0a0a; background:linear-gradient(180deg,#ff3b3b,#cc1f1f); border:none; border-radius:6px; padding:8px 12px; text-decoration:none; box-shadow:0 4px 14px rgba(255,59,59,.35); display:inline-flex; gap:7px; align-items:center; transition:.15s}
+  .ytbtn:hover{transform:translateY(-1px); box-shadow:0 6px 18px rgba(255,59,59,.5)}
+
+  /* branch arrows */
+  .branches{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:6px}
+  .branch{border:1px dashed var(--line); border-radius:9px; padding:12px 14px; background:var(--panel2)}
+  .branch .tag{font-family:var(--mono); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--lvl)}
+  .branch h4{font-family:var(--head); text-transform:uppercase; font-size:16px; margin-top:4px}
+  .branch p{font-size:13px; color:var(--mute); margin-top:5px}
+
+  /* title slide */
+  .title-wrap{flex:1; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; gap:14px}
+  .title-main{font-family:var(--stencil); font-size:clamp(48px,9vw,118px); line-height:.85; letter-spacing:1px}
+  .title-main .def{color:var(--amber); text-shadow:0 0 50px rgba(255,194,77,.4)}
+  .title-main .con{color:#fff}
+  .title-sub{font-family:var(--head); text-transform:uppercase; font-size:clamp(16px,2.4vw,24px); letter-spacing:2px; color:var(--mute)}
+  .stampline{display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:4px}
+  .stamp{font-family:var(--stencil); font-size:13px; letter-spacing:1px; color:#ff5a5a; border:2px solid #ff5a5a; border-radius:6px; padding:6px 12px; transform:rotate(-3deg); text-transform:uppercase; opacity:.9}
+  .evcaveat{font-family:var(--mono); font-size:13.5px; color:var(--amber2); max-width:680px; line-height:1.5; border-left:3px solid var(--amber); padding-left:12px}
+  .ladderhint{font-family:var(--mono); font-size:11px; color:var(--faint); letter-spacing:1px}
+
+  /* recap */
+  .recap-list{display:flex; flex-direction:column; gap:7px; margin-top:8px}
+  .recap-row{display:flex; align-items:center; gap:14px; border:1px solid var(--line); border-left:4px solid var(--rc); border-radius:7px; padding:7px 12px; background:linear-gradient(90deg, color-mix(in srgb,var(--rc) 9%, var(--panel2)), var(--panel2))}
+  .recap-row .rn{font-family:var(--stencil); font-size:26px; color:var(--rc); width:34px; text-align:center; line-height:1}
+  .recap-row .rt{font-family:var(--head); text-transform:uppercase; font-size:15px; letter-spacing:.4px; white-space:nowrap}
+  .recap-row .rd{font-size:13px; color:var(--mute); border-left:1px solid var(--line); padding-left:12px}
+  details.sources{margin-top:12px; border:1px solid var(--line); border-radius:8px; background:var(--panel2)}
+  details.sources summary{font-family:var(--mono); font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--amber2); padding:10px 14px; cursor:pointer}
+  details.sources[open] summary{border-bottom:1px solid var(--line)}
+  .srclist{padding:10px 16px 14px; font-size:12px; color:var(--mute); line-height:1.55; columns:2; column-gap:30px}
+  .srclist li{margin-bottom:7px; break-inside:avoid}
+  .srclist b{color:var(--ink)}
+
+  /* controls */
+  .controls{display:flex; align-items:center; gap:12px; padding-top:10px; border-top:1px solid var(--line); margin-top:10px}
+  .btn{font-family:var(--mono); font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:8px 16px; cursor:pointer; transition:.15s}
+  .btn:hover{border-color:var(--lvl); color:var(--lvl); box-shadow:0 0 14px -4px var(--lvl)}
+  .btn:disabled{opacity:.3; cursor:not-allowed; box-shadow:none; border-color:var(--line); color:var(--ink)}
+  .controls .hint{flex:1; text-align:center; font-family:var(--mono); font-size:10.5px; color:var(--faint); letter-spacing:1px}
+  .progress{height:3px; flex:0 0 220px; background:var(--line); border-radius:2px; overflow:hidden}
+  .progress i{display:block; height:100%; width:0; background:var(--lvl); box-shadow:0 0 10px var(--lvl); transition:width .4s}
+
+  /* svg sway / fx */
+  .sway{transform-origin:bottom center; animation:sway 4.5s ease-in-out infinite}
+  .sway.b{animation-duration:5.6s; animation-delay:-1s}
+  @keyframes sway{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
+  .rise-cloud{transform-origin:bottom center; animation:cloudrise 4.5s ease-out infinite}
+  @keyframes cloudrise{0%{transform:translateY(34px) scale(.5); opacity:0}25%{opacity:.95}100%{transform:translateY(-6px) scale(1.05); opacity:.85}}
+  .bub{animation:bub 2.2s linear infinite}
+  .bub2{animation:bub 2.8s linear infinite; animation-delay:-.8s}
+  .bub3{animation:bub 1.9s linear infinite; animation-delay:-1.4s}
+  @keyframes bub{0%{transform:translateY(0); opacity:0}15%{opacity:.9}100%{transform:translateY(-58px); opacity:0}}
+  .liquid{transform-origin:bottom; animation:chug 4s ease-in-out infinite}
+  @keyframes chug{0%{transform:scaleY(.18)}30%{transform:scaleY(.95)}55%{transform:scaleY(.9)}100%{transform:scaleY(.12)}}
+  .spin-slow{transform-origin:center; animation:radar 9s linear infinite}
+
+  .slide::-webkit-scrollbar,.srclist::-webkit-scrollbar{width:8px}
+  .slide::-webkit-scrollbar-thumb{background:var(--line); border-radius:8px}
+
+  /* --- mush + push banner --- */
+  .mushpush{display:flex; align-items:stretch; gap:10px; margin:0 0 10px; flex-wrap:wrap}
+  .mp{display:flex; flex-direction:column; justify-content:center; padding:6px 14px; border-radius:8px; border:1px solid var(--line)}
+  .mp.half{flex:1; min-width:150px}
+  .mp .mpk{font-family:var(--stencil); font-size:18px; letter-spacing:1px; line-height:1}
+  .mp .mpt{font-family:var(--mono); font-size:11px; color:var(--mute); margin-top:3px; letter-spacing:.3px}
+  .mp.mush{border-left:3px solid #38c6c0; background:linear-gradient(180deg, rgba(56,198,192,.12), var(--panel2))}
+  .mp.mush .mpk{color:#5fe0da}
+  .mp.push{border-left:3px solid #ff9a3c; background:linear-gradient(180deg, rgba(255,154,60,.12), var(--panel2))}
+  .mp.push .mpk{color:#ffb86b}
+  .mpop{display:flex; align-items:center; font-family:var(--stencil); font-size:26px; color:var(--faint); padding:0 2px}
+  .mp.result{flex:0 0 auto; flex-direction:row; align-items:center; gap:8px; border-left:3px solid var(--green); background:linear-gradient(180deg, rgba(62,214,118,.12), var(--panel2))}
+  .mp.result .mpk{color:#7be39a; font-size:14px}
+  .mp.result svg{width:30px; height:30px}
+  /* role badges */
+  .card h3{flex-wrap:wrap; row-gap:6px}
+  .role{font-family:var(--mono); font-size:10px; letter-spacing:.6px; text-transform:uppercase; padding:2px 7px; border-radius:20px; white-space:nowrap}
+  .role.mush{color:#5fe0da; border:1px solid rgba(56,198,192,.4); background:rgba(56,198,192,.1)}
+  .role.push{color:#ffb86b; border:1px solid rgba(255,154,60,.4); background:rgba(255,154,60,.1)}
+  .role.magic{color:#ffe79a; border:1px solid rgba(255,207,63,.45); background:rgba(255,207,63,.12)}
+  /* docusate con-artist card */
+  .card.scam{display:flex; gap:16px; align-items:center; flex-wrap:wrap}
+  .scamtxt{flex:1; min-width:200px}
+  .scamfig{flex:0 0 130px; text-align:center; margin:0}
+  .scamfig figcaption{font-family:var(--mono); font-size:10px; color:#ffb3b3; margin-top:5px; line-height:1.35}
+  .scamfig figcaption i{color:#ff8a8a}
+  .scamfig svg{width:116px; height:auto}
+  /* twinkle */
+  .tw{transform-box:fill-box; transform-origin:center; animation:tw 1.8s ease-in-out infinite; animation-delay:var(--td,0s)}
+  @keyframes tw{0%,100%{opacity:.25; transform:scale(.5)}50%{opacity:1; transform:scale(1.15)}}
+
+  @media (max-width:1080px){
+    .grid{grid-template-columns:1fr}
+    .bignum{font-size:104px}
+    .ladder{width:92px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand"><span class="def">def</span><b>CON</b>STIPATION</div>
+    <div class="sysline">// constipation readiness condition</div>
+    <div class="spacer"></div>
+    <div class="stat"><span class="dot"></span><span id="statusTxt">READINESS: DEFCON 5</span></div>
+    <div class="counter"><span id="cur">01</span>/<span id="tot">09</span></div>
+  </div>
+
+  <!-- CONSOLE -->
+  <div class="console">
+    <!-- LADDER -->
+    <aside class="ladder" id="ladder">
+      <div class="lbl">Threat ↓</div>
+      <div class="rung" style="--rc:var(--blue)"   data-go="1"><div class="n">5</div><div class="t">Lifestyle</div></div>
+      <div class="rung" style="--rc:var(--green)"  data-go="2"><div class="n">4</div><div class="t">PEG · Senna</div></div>
+      <div class="rung" style="--rc:var(--yellow)" data-go="3"><div class="n">3</div><div class="t">Double it</div></div>
+      <div class="rung" style="--rc:var(--red)"    data-go="4"><div class="n">2</div><div class="t">Go rectal</div></div>
+      <div class="rung" style="--rc:var(--white)"  data-go="7"><div class="n">1</div><div class="t">Nuclear</div></div>
+    </aside>
+
+    <!-- STAGE -->
+    <main class="stage" id="stage">
+      <span class="corner-code" id="cornerCode">SECTOR · STAND BY</span>
+
+      <!-- 0 TITLE -->
+      <section class="slide" data-lvl="title" data-status="STANDING BY" data-code="WAR ROOM // GI COMMAND">
+        <div class="title-wrap">
+          <div class="kicker" data-anim style="--d:.0s">Internal Medicine · Academic Half-Day · The Battle Plan for the Backed-Up</div>
+          <h1 class="title-main" data-anim style="--d:.08s"><span class="def">def</span><span class="con">CON</span>STIPATION</h1>
+          <div class="title-sub" data-anim style="--d:.18s">A stepwise readiness plan · DEFCON 5 → 1 · stand by to stand down</div>
+          <div class="evcaveat" data-anim style="--d:.26s">Fair warning: the evidence here is mostly <b>shitty</b> &mdash; as in, nearly all of it is supportive / symptomatic care. <i>No pun intended.</i> We escalate one readiness level at a time.</div>
+          <div class="stampline" data-anim style="--d:.34s">
+            <span class="stamp">Rule out the badness first</span>
+            <span class="stamp" style="transform:rotate(2deg); color:#ffc24d; border-color:#ffc24d">Start cheap, escalate slow</span>
+          </div>
+          <div class="ladderhint" data-anim style="--d:.42s">► Use the ladder on the left or arrow keys (← →). Press 1&ndash;5 to jump to a readiness level.</div>
+        </div>
+      </section>
+
+      <!-- 1 DEFCON 5 -->
+      <section class="slide" data-lvl="5" data-status="DEFCON 5 · LIFESTYLE" data-code="CODE: FADE OUT // REGULAR JOE">
+        <div class="kicker" data-anim>Readiness Condition</div>
+        <div class="lvlhead">
+          <div class="bignum" data-anim style="--d:.05s; --kx:3s">5</div>
+          <div data-anim style="--d:.12s">
+            <div class="lvltitle">Lifestyle
+              <small>Peacetime. Optimize the basics &mdash; <b>but first confirm this is constipation, not catastrophe.</b></small>
+            </div>
+            <div class="codeline" data-anim>MIL CODE <b>FADE OUT</b> · GI CODE <b>REGULAR JOE</b> · color: BLUE</div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="col">
+            <div class="card" data-anim style="--d:.18s">
+              <h3>The big three</h3>
+              <p><span class="hl">Hydration</span>, <span class="hl">fiber</span> (favor soluble/psyllium; piling on insoluble fiber can backfire and bloat), and <span class="hl">physical activity</span>. Cheap, safe, low yield &mdash; but it's where everyone starts.</p>
+              <div class="chips"><span class="chip ev">AGA/ACG 2023 — fiber: conditional, very-low certainty</span><span class="chip ev">lifestyle = first step, limited data</span></div>
+            </div>
+            <div class="card warn" data-anim style="--d:.26s">
+              <h3>⚠ First: make sure it's not the badness</h3>
+              <p>Before you push anything pro-motility, exclude <span class="hl">ileus, mechanical obstruction</span>, and other ominous causes. All these laxatives are contraindicated in known/suspected obstruction.</p>
+              <div class="redflags"><span>no flatus</span><span>distension</span><span>vomiting</span><span>peritonitis</span><span>weight loss</span><span>hematochezia</span><span>new onset &gt;50</span></div>
+            </div>
+          </div>
+          <div class="viz" data-anim style="--d:.3s">
+            <svg viewBox="0 0 220 200" width="100%" style="max-height:230px">
+              <defs><linearGradient id="grnd5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a2a22"/><stop offset="1" stop-color="#0c1310"/></linearGradient></defs>
+              <rect x="0" y="150" width="220" height="50" fill="url(#grnd5)"/>
+              <circle cx="186" cy="38" r="18" fill="#3fa7ff" opacity=".5"/>
+              <!-- water glass -->
+              <g transform="translate(34,70)"><path d="M2 0 H46 L42 78 H6 Z" fill="none" stroke="#3fa7ff" stroke-width="2.5"/><clipPath id="wc5"><path d="M4 2 H44 L40 76 H8 Z"/></clipPath><g clip-path="url(#wc5)"><rect class="liquid" x="0" y="6" width="48" height="74" fill="#3fa7ff" opacity=".45"/></g></g>
+              <!-- fiber stalk -->
+              <g transform="translate(108,60)"><rect x="6" y="20" width="5" height="78" fill="#5a7a3a"/><g class="sway"><path d="M8 20 q-22 -10 -28 -26 q22 4 28 22Z" fill="#6fae3c"/><path d="M9 30 q22 -10 28 -26 q-22 4 -28 22Z" fill="#7cbf45"/></g></g>
+              <!-- runner -->
+              <g transform="translate(160,96)" stroke="#3ed676" stroke-width="3" fill="none" stroke-linecap="round"><circle cx="8" cy="-22" r="6" fill="#3ed676" stroke="none"/><path d="M8 -16 L6 0"/><path d="M6 -10 L20 -6 M6 -10 L-8 -14"/><path d="M6 0 L18 12 M6 0 L-6 14"/></g>
+            </svg>
+            <div class="cap">Water · fiber · movement</div>
+          </div>
+        </div>
+        <div class="joke" data-anim>Threat level: minimal. We are at peace... ish. The colon has merely filed a formal complaint.</div>
+      </section>
+
+      <!-- 2 DEFCON 4 -->
+      <section class="slide" data-lvl="4" data-status="DEFCON 4 · OSMOTIC + STIMULANT" data-code="CODE: DOUBLE TAKE // OSMOTIC OPENER">
+        <div class="kicker" data-anim>Readiness Condition</div>
+        <div class="lvlhead">
+          <div class="bignum" data-anim style="--d:.05s; --kx:2.7s">4</div>
+          <div data-anim style="--d:.12s">
+            <div class="lvltitle">The workhorses
+              <small>An osmotic to soften and a stimulant to push. This is where most of your wins happen.</small>
+            </div>
+            <div class="codeline">MIL CODE <b>DOUBLE TAKE</b> · GI CODE <b>OSMOTIC OPENER</b> · color: GREEN</div>
+          </div>
+        </div>
+        <div class="mushpush" data-anim style="--d:.15s">
+          <div class="mp half mush"><span class="mpk">THE MUSH</span><span class="mpt">MiraLAX · osmotic softens it</span></div>
+          <div class="mpop">+</div>
+          <div class="mp half push"><span class="mpk">THE PUSH</span><span class="mpt">Senna · stimulant moves it</span></div>
+          <div class="mpop">=</div>
+          <div class="mp result"><svg viewBox="0 0 40 40"><g fill="#9a6a3a"><ellipse cx="20" cy="33" rx="15" ry="5.5"/><path d="M8 31 q2-10 12-10 q10 0 12 10Z"/><path d="M12 23 q1-7 8-7 q7 0 8 7Z"/><path d="M15 17 q1-5 5-5 q4 0 5 5Z"/></g><g fill="#3a2410"><circle cx="15" cy="29" r="1.6"/><circle cx="25" cy="29" r="1.6"/></g><path d="M16 32 q4 3 8 0" stroke="#3a2410" stroke-width="1.4" fill="none"/></svg><span class="mpk">clearance</span></div>
+        </div>
+        <div class="grid">
+          <div class="col">
+            <div class="card" data-anim style="--d:.18s">
+              <h3>MiraLAX <span class="role mush">the mush</span> <span class="dose">PEG 3350 · titrate by 17 g</span></h3>
+              <p>Osmotic, well tolerated, the evidence darling. Start 17 g daily and <span class="hl">step up in 17 g increments</span> to effect.</p>
+              <div class="chips"><span class="chip ev">AGA/ACG 2023 — PEG: STRONG rec, moderate certainty</span></div>
+              <a class="ytbtn" href="https://www.youtube.com/shorts/I3DTbmYelJs?feature=share" target="_blank" rel="noopener" style="margin-top:10px">▶ Watch the PEG chug</a>
+            </div>
+            <div class="card" data-anim style="--d:.26s">
+              <h3>Senna <span class="role push">the push</span> <span class="dose">8.6 mg sennosides / tab</span></h3>
+              <p>You'll order it as <span class="hl">Senokot</span> &mdash; a stimulant and <span class="hl">a natural product of the desert</span>. Chronic use paints the colon: <span class="hl">melanosis coli</span> &mdash; benign, reversible anthraquinone pigment, <span class="hl">not premalignant</span>.</p>
+              <div class="chips"><span class="chip ev">AGA/ACG 2023 — senna: recommended</span></div>
+            </div>
+            <div class="card ban" data-anim style="--d:.34s">
+              <h3>🚫 No docusate — the great Colace con</h3>
+              <p>The participation trophy of laxatives: RCTs show it's <span class="hl">no better than placebo</span> &mdash; AGA/ACG 2023 didn't even bother to recommend it.</p>
+              <div class="chips"><span class="chip bad">docusate ≈ placebo</span><span class="chip bad">omitted from AGA/ACG 2023</span></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="viz split" data-anim style="--d:.3s">
+              <div>
+                <svg viewBox="0 0 150 150" width="100%" style="max-height:138px">
+                  <g opacity=".3" fill="#2f4a2c"><path d="M10 150 V122 q0-4 4-4 t4 4 V150Z"/><rect x="6" y="130" width="4" height="10" rx="2"/></g>
+                  <g transform="translate(33,26)">
+                    <path d="M64 14 L80 7 L80 92 L64 99 Z" fill="#561425"/>
+                    <path d="M10 14 L26 7 L80 7 L64 14 Z" fill="#9c2a40"/>
+                    <rect x="10" y="14" width="54" height="85" rx="2" fill="#7a1e30"/>
+                    <text x="37" y="34" text-anchor="middle" font-family="Oswald" font-weight="700" font-size="13" letter-spacing="1" fill="#fff">SENOKOT</text>
+                    <g transform="translate(37,52)" fill="#4faf4f">
+                      <path d="M0 18 V-2" stroke="#3e8e3e" stroke-width="2"/>
+                      <ellipse cx="-7" cy="2" rx="6" ry="3" transform="rotate(-30 -7 2)"/>
+                      <ellipse cx="7" cy="2" rx="6" ry="3" transform="rotate(30 7 2)"/>
+                      <ellipse cx="-6" cy="10" rx="6" ry="3" transform="rotate(-30 -6 10)"/>
+                      <ellipse cx="6" cy="10" rx="6" ry="3" transform="rotate(30 6 10)"/>
+                      <ellipse cx="0" cy="-3" rx="4" ry="6" fill="#5cc05c"/>
+                    </g>
+                    <text x="37" y="84" text-anchor="middle" font-family="Share Tech Mono" font-size="7.5" fill="#f0d6dc">sennosides 8.6 mg</text>
+                  </g>
+                </svg>
+                <div class="cap">Senokot — desert senna</div>
+              </div>
+              <div>
+                <svg viewBox="0 0 150 150" width="100%" style="max-height:138px">
+                  <defs>
+                    <radialGradient id="muc" cx="50%" cy="46%" r="62%"><stop offset="0%" stop-color="#a8702f"/><stop offset="52%" stop-color="#6e3f1c"/><stop offset="100%" stop-color="#22120a"/></radialGradient>
+                    <radialGradient id="lum" cx="50%" cy="52%" r="55%"><stop offset="0%" stop-color="#120802"/><stop offset="100%" stop-color="#120802" stop-opacity="0"/></radialGradient>
+                    <clipPath id="circ"><circle cx="75" cy="75" r="66"/></clipPath>
+                  </defs>
+                  <circle cx="75" cy="75" r="73" fill="#000"/>
+                  <g clip-path="url(#circ)">
+                    <rect width="150" height="150" fill="url(#muc)"/>
+                    <g fill="#dcb784" opacity=".5"><ellipse cx="46" cy="40" rx="6" ry="4"/><ellipse cx="92" cy="34" rx="5" ry="4"/><ellipse cx="118" cy="58" rx="6" ry="5"/><ellipse cx="34" cy="74" rx="5" ry="4"/><ellipse cx="120" cy="96" rx="5" ry="4"/><ellipse cx="58" cy="116" rx="6" ry="4"/><ellipse cx="98" cy="118" rx="5" ry="4"/><ellipse cx="40" cy="104" rx="4" ry="3"/><ellipse cx="70" cy="30" rx="4" ry="3"/><ellipse cx="104" cy="78" rx="4" ry="3"/></g>
+                    <path d="M4 96 Q54 124 96 96 T150 110" fill="none" stroke="#2a160a" stroke-width="9" opacity=".55"/>
+                    <ellipse cx="78" cy="80" rx="26" ry="22" fill="url(#lum)"/>
+                    <ellipse cx="52" cy="48" rx="16" ry="9" fill="#fff" opacity=".07"/>
+                  </g>
+                  <circle cx="75" cy="75" r="66" fill="none" stroke="#0a0a0a" stroke-width="11" opacity=".6"/>
+                </svg>
+                <div class="cap">Melanosis coli — benign</div>
+              </div>
+            </div>
+            <figure class="viz conart" data-anim style="--d:.4s">
+              <svg viewBox="0 0 150 150" width="100%" style="max-height:150px">
+                <rect x="80" y="2" width="68" height="30" rx="7" fill="#13201b" stroke="#3e8e3e"/>
+                <path d="M96 32 l-6 10 14 -6Z" fill="#13201b" stroke="#3e8e3e"/>
+                <text x="114" y="16" text-anchor="middle" font-family="Share Tech Mono" font-size="8" fill="#bfe9cd">Works every</text>
+                <text x="114" y="26" text-anchor="middle" font-family="Share Tech Mono" font-size="8" fill="#bfe9cd">time!*</text>
+                <path d="M24 150 V96 q0-22 26-22 q26 0 26 22 V150Z" fill="#2a3340"/>
+                <rect x="45" y="60" width="10" height="18" fill="#e8c39a"/>
+                <path d="M50 78 L36 120 L50 96Z" fill="#222a35"/>
+                <path d="M50 78 L64 120 L50 96Z" fill="#222a35"/>
+                <path d="M50 80 L43 124 H57Z" fill="#7a1e30"/>
+                <path d="M43 80 l8 5 -8 5Z" fill="#c0392b"/><path d="M57 80 l-8 5 8 5Z" fill="#c0392b"/><circle cx="50" cy="85" r="2.2" fill="#e0c060"/>
+                <circle cx="50" cy="50" r="15" fill="#e8c39a"/>
+                <circle cx="44" cy="48" r="1.8" fill="#2a1a0e"/>
+                <path d="M53 48 q3.5 -2.5 7 0" stroke="#2a1a0e" stroke-width="1.6" fill="none"/>
+                <path d="M43 57 q8 5 15 -1" stroke="#7a3b1e" stroke-width="1.6" fill="none"/>
+                <g fill="#3a2410"><path d="M50 56 q-10 -1 -14 5 q8 -1 14 -3Z"/><path d="M50 56 q10 -1 14 5 q-8 -1 -14 -3Z"/></g>
+                <ellipse cx="50" cy="34" rx="24" ry="5" fill="#1a1f27"/>
+                <rect x="39" y="10" width="22" height="24" rx="2" fill="#1a1f27"/>
+                <rect x="39" y="28" width="22" height="4" fill="#7a1e30"/>
+                <path d="M72 94 q20 -2 26 -52" stroke="#2a3340" stroke-width="9" fill="none" stroke-linecap="round"/>
+                <g transform="translate(88,38)">
+                  <rect x="9" y="-7" width="8" height="8" rx="1" fill="#8a5a2a"/>
+                  <rect x="0" y="1" width="26" height="34" rx="3" fill="#6fae3c" stroke="#3e8e3e"/>
+                  <rect x="2" y="12" width="22" height="14" rx="1" fill="#f0ead6"/>
+                  <text x="13" y="22" text-anchor="middle" font-family="Oswald" font-weight="700" font-size="6" fill="#5c1726">COLACE</text>
+                </g>
+              </svg>
+              <figcaption class="cap">The Colace con artist &mdash; swore it works every time <i>(it does not)</i></figcaption>
+            </figure>
+          </div>
+        </div>
+        <div class="joke" data-anim>If you reflexively wrote "Colace" on the order set, this slide is your intervention.</div>
+      </section>
+
+      <!-- 3 DEFCON 3 -->
+      <section class="slide" data-lvl="3" data-status="DEFCON 3 · DOUBLE IT" data-code="CODE: ROUND HOUSE // DOUBLE TAP">
+        <div class="kicker" data-anim>Readiness Condition</div>
+        <div class="lvlhead">
+          <div class="bignum" data-anim style="--d:.05s; --kx:2.4s">3</div>
+          <div data-anim style="--d:.12s">
+            <div class="lvltitle">Double it
+              <small>Stack a second osmotic and bring in a heavier stimulant. We are escalating.</small>
+            </div>
+            <div class="codeline">MIL CODE <b>ROUND HOUSE</b> · GI CODE <b>DOUBLE TAP</b> · color: YELLOW</div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="col">
+            <div class="card" data-anim style="--d:.18s">
+              <h3>Mg citrate <span class="dose">osmotic · "tastes good"*</span></h3>
+              <p>Saline osmotic, brisk. (*citation needed on "tastes good.") Magnesium oxide also earns a nod for chronic use.</p>
+              <div class="chips"><span class="chip ev">AGA/ACG 2023 — Mg oxide: conditional</span></div>
+            </div>
+            <div class="card" data-anim style="--d:.26s">
+              <h3>Lactulose <span class="dose">~15 g "shooters"</span></h3>
+              <p>Works, but <span class="hl">PEG beats it head-to-head</span> for stool frequency, form, and need for rescue meds &mdash; <span class="hl">and even in acute HE</span>, where PEG resolved encephalopathy in 91% vs 52% for lactulose.</p>
+              <div class="chips"><span class="chip ev">Cochrane 2010 · PEG &gt; lactulose</span><span class="chip ev">HELP trial · JAMA IM 2014 · acute HE</span></div>
+            </div>
+            <div class="card" data-anim style="--d:.34s">
+              <h3>Bisacodyl — break the damn <span class="role magic">✦ magic bullet</span> <span class="dose">PO 5–10 mg · PR 5–15 mg</span></h3>
+              <p>Diphenylmethane stimulant. The oral works overnight; the rectal <span class="hl">"Magic Bullet"</span> (Dulcolax; supp commonly 10 mg) is your fast pass.</p>
+              <div class="chips"><span class="chip ev">Kamm · Clin Gastro Hepatol 2011 (RCT)</span></div>
+            </div>
+          </div>
+          <div class="viz" data-anim style="--d:.3s">
+            <svg viewBox="0 0 200 200" width="100%" style="max-height:240px">
+              <!-- two osmotic glasses + a bullet -->
+              <g transform="translate(20,40)"><path d="M2 0 H40 L36 70 H6 Z" fill="none" stroke="#ffd23f" stroke-width="2.5"/><clipPath id="g3a"><path d="M4 2 H38 L34 68 H8 Z"/></clipPath><g clip-path="url(#g3a)"><rect class="liquid" x="0" y="6" width="40" height="66" fill="#ffd23f" opacity=".4"/></g><text x="21" y="86" text-anchor="middle" font-family="Share Tech Mono" font-size="8" fill="#ffe0a3">MgCit</text></g>
+              <g transform="translate(86,40)"><path d="M2 0 H40 L36 70 H6 Z" fill="none" stroke="#caa23a" stroke-width="2.5"/><clipPath id="g3b"><path d="M4 2 H38 L34 68 H8 Z"/></clipPath><g clip-path="url(#g3b)"><rect class="liquid" x="0" y="6" width="40" height="66" fill="#caa23a" opacity=".4" style="animation-delay:-1.4s"/></g><text x="21" y="86" text-anchor="middle" font-family="Share Tech Mono" font-size="8" fill="#ffe0a3">lactulose</text></g>
+              <!-- bisacodyl MAGIC bullet -->
+              <defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0b0"/><stop offset=".5" stop-color="#ffcf3f"/><stop offset="1" stop-color="#d99a18"/></linearGradient></defs>
+              <g transform="translate(150,50)">
+                <ellipse cx="14" cy="40" rx="22" ry="22" fill="#ffd23f" opacity=".14"/>
+                <path d="M14 2 q14 0 14 18 v32 q0 14 -14 14 q-14 0 -14 -14 V20 Q0 2 14 2Z" fill="url(#gold)" stroke="#b8860b" stroke-width="1.4"/>
+                <path d="M14 2 q14 0 14 18 v6 H0 V20 Q0 2 14 2Z" fill="#fff" opacity=".55"/>
+                <g fill="#fff3b0">
+                  <g transform="translate(-6,8)"><path class="tw" style="--td:0s" d="M0 -5 L1.4 -1.4 5 0 1.4 1.4 0 5 -1.4 1.4 -5 0 -1.4 -1.4Z"/></g>
+                  <g transform="translate(32,16)"><path class="tw" style="--td:.5s" d="M0 -4 L1.1 -1.1 4 0 1.1 1.1 0 4 -1.1 1.1 -4 0 -1.1 -1.1Z"/></g>
+                  <g transform="translate(28,-2)"><path class="tw" style="--td:.9s" d="M0 -6 L1.7 -1.7 6 0 1.7 1.7 0 6 -1.7 1.7 -6 0 -1.7 -1.7Z"/></g>
+                  <g transform="translate(-4,42)"><path class="tw" style="--td:1.3s" d="M0 -4 L1.1 -1.1 4 0 1.1 1.1 0 4 -1.1 1.1 -4 0 -1.1 -1.1Z"/></g>
+                </g>
+                <text x="14" y="92" text-anchor="middle" font-family="Share Tech Mono" font-size="7.5" fill="#ffe0a3">magic bullet</text>
+              </g>
+            </svg>
+            <div class="cap">Two osmotics + the Magic Bullet</div>
+          </div>
+        </div>
+        <div class="joke" data-anim>Bisacodyl: for when the colon stops returning your calls and you need to break the seal on negotiations.</div>
+      </section>
+
+      <!-- 4 DEFCON 2 -->
+      <section class="slide" data-lvl="2" data-status="DEFCON 2 · GO RECTAL" data-code="CODE: FAST PACE // BREACH PROTOCOL">
+        <div class="kicker" data-anim>Readiness Condition</div>
+        <div class="lvlhead">
+          <div class="bignum" data-anim style="--d:.05s; --kx:2s">2</div>
+          <div data-anim style="--d:.12s">
+            <div class="lvltitle">Go rectal
+              <small>Forces are mobilized. We approach from below &mdash; and we screen for two special situations.</small>
+            </div>
+            <div class="codeline">MIL CODE <b>FAST PACE</b> · GI CODE <b>BREACH PROTOCOL</b> · color: RED</div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="col">
+            <div class="card" data-anim style="--d:.18s">
+              <h3>Enemas <span class="dose">rescue therapy</span></h3>
+              <p><span class="hl">Tap water</span> or <span class="hl">glycerin / oil</span> (lactulose is fine too). Restrict enemas to rescue, not routine.</p>
+              <div class="chips"><span class="chip ev">AGA OIC 2019 — enemas = rescue only</span></div>
+            </div>
+            <div class="card warn" data-anim style="--d:.26s">
+              <h3>⚠ Please — no soap suds</h3>
+              <p>Soap-suds enemas can trigger <span class="hl">chemical colitis</span> and mucosal injury. Ever had soap rubbed in your mouth? Neither has your rectum, and it would like to keep it that way.</p>
+            </div>
+            <div class="card warn" data-anim style="--d:.34s">
+              <h3>☠ Fleet (sodium phosphate) can kill the kidney</h3>
+              <p>Oral/rectal sodium phosphate can cause <span class="hl">acute phosphate nephropathy</span> &mdash; genuinely dangerous in <span class="hl">ESRD / CKD</span>, the elderly, and the volume-depleted.</p>
+              <div class="chips"><span class="chip bad">FDA safety warning · nephrocalcinosis</span><span class="chip bad">avoid in renal impairment</span></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="viz" data-anim style="--d:.3s; flex:0 0 auto">
+              <svg viewBox="0 0 200 120" width="100%" style="max-height:120px">
+                <!-- hazard enema bottle -->
+                <g transform="translate(40,18)"><path d="M20 12 h18 v10 q14 6 14 40 q0 22 -23 22 q-23 0 -23 -22 q0 -34 14 -40 Z" fill="none" stroke="#ff5a5a" stroke-width="2.5"/><rect x="24" y="0" width="10" height="14" fill="#ff5a5a" opacity=".6"/></g>
+                <g transform="translate(116,30)"><path d="M28 0 L56 50 H0 Z" fill="none" stroke="#ff5a5a" stroke-width="3"/><text x="28" y="42" text-anchor="middle" font-family="Saira Stencil One" font-size="26" fill="#ff5a5a">!</text></g>
+              </svg>
+              <div class="cap">Right tool, wrong patient = harm</div>
+            </div>
+            <div class="branches" data-anim style="--d:.4s">
+              <div class="branch" style="border-color:#ff7a7a">
+                <div class="tag">Side branch →</div>
+                <h4>On opioids?</h4>
+                <p>Think PAMORAs. See DEFCON&nbsp;2A.</p>
+              </div>
+              <div class="branch" style="border-color:#ff7a7a">
+                <div class="tag">Side branch →</div>
+                <h4>Chronic / refractory?</h4>
+                <p>Think secretagogues. See DEFCON&nbsp;2B.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="joke" data-anim>Two rules at DEFCON 2: enemas are for rescue, and soap is for dishes.</div>
+      </section>
+
+      <!-- 5 DEFCON 2A -->
+      <section class="slide" data-lvl="2" data-status="DEFCON 2A · OPIOID-INDUCED" data-code="SIDE BRANCH // PAMORA">
+        <div class="kicker" data-anim>Side Branch · DEFCON 2A</div>
+        <div class="lvlhead">
+          <div class="bignum" data-anim style="--d:.05s; --kx:2s; font-size:96px">2A</div>
+          <div data-anim style="--d:.12s">
+            <div class="lvltitle">Opioid-induced? → PAMORAs
+              <small>Peripheral mu-opioid antagonists block gut receptors and reverse constipation <b>without touching analgesia</b>.</small>
+            </div>
+            <div class="codeline">First: an adequate trial of <b>≥2 laxative classes, scheduled (not PRN)</b>. Fiber doesn't help OIC.</div>
+          </div>
+        </div>
+        <div class="grid one">
+          <div class="col">
+            <div class="branches" data-anim style="--d:.18s; grid-template-columns:repeat(3,1fr)">
+              <div class="card"><h3>Naloxegol <span class="dose">PO daily</span></h3><p>Often the <span class="hl">cheapest</span> and just as effective.</p><div class="chips"><span class="chip ev">AGA OIC 2019 — STRONG rec</span></div></div>
+              <div class="card"><h3>Naldemedine <span class="dose">PO daily</span></h3><p><span class="hl">Underused.</span> Strong evidence (COMPOSE 1/2/3).</p><div class="chips"><span class="chip ev">AGA OIC 2019 — STRONG, high-quality</span></div></div>
+              <div class="card"><h3>Methylnaltrexone <span class="dose">SC or PO</span></h3><p>Works, but weaker evidence base.</p><div class="chips"><span class="chip ev">AGA OIC 2019 — conditional</span></div></div>
+            </div>
+            <div class="card" data-anim style="--d:.3s">
+              <h3>Mechanism in one line</h3>
+              <p>Block <span class="hl">peripheral</span> mu-opioid receptors in the gut wall → restore motility and secretion, while the central analgesia stays intact. Don't cross the blood-brain barrier.</p>
+              <div class="chips"><span class="chip">Crockett et al · Gastroenterology 2019</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="joke" data-anim>Reach for the PAMORA before the fifth round of senna. Naloxegol is cheap; your patient's dignity is not.</div>
+      </section>
+
+      <!-- 6 DEFCON 2B -->
+      <section class="slide" data-lvl="2" data-status="DEFCON 2B · CHRONIC / REFRACTORY" data-code="SIDE BRANCH // SECRETAGOGUES">
+        <div class="kicker" data-anim>Side Branch · DEFCON 2B</div>
+        <div class="lvlhead">
+          <div class="bignum" data-anim style="--d:.05s; --kx:2s; font-size:96px">2B</div>
+          <div data-anim style="--d:.12s">
+            <div class="lvltitle">Chronic / refractory? → Secretagogues
+              <small>OTC stuff failed? Step up to prescription pro-secretory / prokinetic agents.</small>
+            </div>
+            <div class="codeline">No head-to-heads against the traditional agents → that's <b>why you step up only after the cheap stuff fails</b> (cost &amp; access).</div>
+          </div>
+        </div>
+        <div class="grid one">
+          <div class="col">
+            <div class="branches" data-anim style="--d:.18s; grid-template-columns:repeat(3,1fr)">
+              <div class="card"><h3>Linaclotide <span class="dose">GC-C agonist</span></h3><p>Pulls chloride &amp; water into the lumen.</p><div class="chips"><span class="chip ev">AGA/ACG 2023</span></div></div>
+              <div class="card"><h3>Lubiprostone <span class="dose">ClC-2 activator</span></h3><p>Opens chloride channels → secretion.</p><div class="chips"><span class="chip ev">AGA/ACG 2023</span></div></div>
+              <div class="card"><h3>Prucalopride <span class="dose">5-HT₄ agonist</span></h3><p>A prokinetic — drives colonic transit.</p><div class="chips"><span class="chip ev">AGA/ACG 2023</span></div></div>
+            </div>
+            <div class="card" data-anim style="--d:.3s">
+              <h3>The practical point</h3>
+              <p>These are <span class="hl">effective but pricey</span> and were studied vs placebo, not vs PEG/senna. So: exhaust the cheap, evidence-backed workhorses first, then escalate here for genuinely refractory CIC.</p>
+            </div>
+          </div>
+        </div>
+        <div class="joke" data-anim>Expensive ≠ better-than-PEG. It means "we never ran that trial." Earn the prior-auth.</div>
+      </section>
+
+      <!-- 7 DEFCON 1 -->
+      <section class="slide" data-lvl="1" data-status="DEFCON 1 · NUCLEAR" data-code="CODE: COCKED PISTOL // FULL EVAC">
+        <div class="kicker" data-anim>Readiness Condition</div>
+        <div class="lvlhead">
+          <div class="bignum" data-anim style="--d:.05s; --kx:1.4s">1</div>
+          <div data-anim style="--d:.12s">
+            <div class="lvltitle">The nuclear options
+              <small>Diplomacy has failed. We are no longer negotiating. Evacuate.</small>
+            </div>
+            <div class="codeline">MIL CODE <b>COCKED PISTOL</b> · GI CODE <b>FULL EVAC</b> · color: WHITE</div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="col">
+            <div class="card" data-anim style="--d:.18s">
+              <h3>"Go-not-so-lytely" <span class="dose">PEG-electrolyte lavage</span></h3>
+              <p>Full-volume PEG <span class="hl">+ electrolytes</span> (GoLYTELY-style). Carries a <span class="hl">non-zero aspiration risk</span> &mdash; mind the airway, the obtunded, and any whiff of ileus/obstruction.</p>
+            </div>
+            <div class="card warn" data-anim style="--d:.26s">
+              <h3>Disimpaction — manual (please, no) vs endoscopic</h3>
+              <p>Manual disimpaction when you must; <span class="hl">endoscopic decompression / disimpaction</span> when the situation (or the dignity) demands escalation.</p>
+            </div>
+            <div class="card" data-anim style="--d:.34s">
+              <h3>Neostigmine <span class="dose">2 mg IV · for ACPO</span></h3>
+              <p>For <span class="hl">acute colonic pseudo-obstruction (Ogilvie)</span> — and it's dramatic: <span class="hl">10/11 responded, median 4 minutes.</span> Use <span class="hl">cardiac monitoring</span> (bradycardia), have atropine ready, and exclude mechanical obstruction first.</p>
+              <div class="chips"><span class="chip ev">Ponec et al · NEJM 1999 (RCT)</span><span class="chip bad">monitor for bradycardia</span></div>
+            </div>
+          </div>
+          <div class="viz" data-anim style="--d:.3s">
+            <svg viewBox="0 0 200 200" width="100%" style="max-height:240px">
+              <!-- mushroom cloud -->
+              <g class="rise-cloud" fill="#f4f8f6">
+                <rect x="86" y="60" width="28" height="60" rx="10" opacity=".85"/>
+                <ellipse cx="100" cy="56" rx="48" ry="26" opacity=".9"/>
+                <circle cx="64" cy="52" r="16" opacity=".85"/><circle cx="136" cy="52" r="16" opacity=".85"/><circle cx="100" cy="40" r="20" opacity=".9"/>
+              </g>
+              <!-- toilet -->
+              <g transform="translate(58,118)" fill="none" stroke="#cdd8d3" stroke-width="3">
+                <path d="M4 0 q40 -8 80 0 q-6 30 -40 30 q-34 0 -40 -30Z" fill="#11201b"/>
+                <path d="M40 30 V52 H30 V62 H58 V52 H48 V30" fill="#11201b"/>
+                <rect x="20" y="60" width="48" height="8" rx="3" fill="#11201b"/>
+              </g>
+            </svg>
+            <div class="cap">the nuclear options</div>
+          </div>
+        </div>
+        <div class="joke" data-anim>If you've reached DEFCON 1, the call has already been escalated, the gloves are on, and somebody is praying. Document accordingly.</div>
+      </section>
+
+      <!-- 8 RECAP -->
+      <section class="slide" data-lvl="title" data-status="STAND DOWN · SITREP" data-code="DECLASSIFIED // SOURCES">
+        <div class="kicker" data-anim>Stand Down · Situation Report</div>
+        <h2 class="lvltitle" data-anim style="--d:.05s; font-size:30px; margin-bottom:6px">The whole ladder, at a glance</h2>
+        <div class="recap-list">
+          <div class="recap-row" data-anim style="--rc:var(--blue); --d:.10s"><div class="rn">5</div><div class="rt">Lifestyle</div><div class="rd">Hydrate · fiber · move — and <b>rule out obstruction</b> before anything.</div></div>
+          <div class="recap-row" data-anim style="--rc:var(--green); --d:.16s"><div class="rn">4</div><div class="rt">PEG + Senna</div><div class="rd"><b>PEG 3350</b> by 17 g + senna 8.6 mg. <b>No docusate.</b></div></div>
+          <div class="recap-row" data-anim style="--rc:var(--yellow); --d:.22s"><div class="rn">3</div><div class="rt">Double it</div><div class="rd">Mg citrate + lactulose (PEG wins H2H) + bisacodyl bullet.</div></div>
+          <div class="recap-row" data-anim style="--rc:var(--red); --d:.28s"><div class="rn">2</div><div class="rt">Go rectal</div><div class="rd">Enema (no soap suds; Fleet kills kidneys) → PAMORA if opioids, secretagogue if chronic.</div></div>
+          <div class="recap-row" data-anim style="--rc:var(--white); --d:.34s"><div class="rn">1</div><div class="rt">Nuclear</div><div class="rd">PEG lavage · disimpaction · <b>neostigmine for Ogilvie</b> (monitored).</div></div>
+        </div>
+        <details class="sources" data-anim style="--d:.4s">
+          <summary>▼ Sources (declassified)</summary>
+          <ul class="srclist">
+            <li><b>Chang L, et al.</b> AGA-ACG Clinical Practice Guideline: Pharmacological Management of Chronic Idiopathic Constipation. <i>Am J Gastroenterol</i> 2023;118(6):936–954. (PEG strong rec; Mg oxide, lactulose, senna, bisacodyl, secretagogues, prucalopride.)</li>
+            <li><b>Lee-Robichaud H, et al.</b> Lactulose versus Polyethylene Glycol for Chronic Constipation. <i>Cochrane Database Syst Rev</i> 2010;(7):CD007570. (PEG &gt; lactulose.)</li>
+            <li><b>Rahimi RS, et al.</b> Lactulose vs PEG 3350–Electrolyte Solution for Overt Hepatic Encephalopathy: the HELP RCT. <i>JAMA Intern Med</i> 2014;174(11):1727–1733. (PEG 91% vs lactulose 52% improvement.)</li>
+            <li><b>Kamm MA, et al.</b> Oral bisacodyl is effective and well-tolerated in chronic constipation: an RCT. <i>Clin Gastroenterol Hepatol</i> 2011;9(7):577–583.</li>
+            <li><b>Crockett SD, et al.</b> AGA Institute Guideline on Medical Management of Opioid-Induced Constipation. <i>Gastroenterology</i> 2019;156(1):218–226. (Naldemedine &amp; naloxegol strong; methylnaltrexone conditional; enemas = rescue; fiber unhelpful in OIC.)</li>
+            <li><b>Ponec RJ, Saunders MD, Kimmey MB.</b> Neostigmine for the Treatment of Acute Colonic Pseudo-Obstruction. <i>N Engl J Med</i> 1999;341(3):137–141. (Immediate response 10/11 vs 0/10 placebo, median 4 min.)</li>
+            <li><b>US FDA.</b> Safety warning: oral sodium phosphate products and risk of acute phosphate nephropathy (2008/2014). Caution in CKD/ESRD, elderly, volume-depleted.</li>
+            <li><b>Docusate:</b> RCT/review evidence shows no benefit over placebo; omitted from the AGA/ACG 2023 recommended agents.</li>
+          </ul>
+        </details>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button class="btn" id="prev">◄ Prev</button>
+    <div class="hint">← / → or Space to advance · 1–5 jump to readiness level · click the ladder</div>
+    <div class="progress"><i id="bar"></i></div>
+    <button class="btn" id="next">Next ►</button>
+  </div>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const stage=document.getElementById('stage');
+  const ladder=document.getElementById('ladder');
+  const rungs=[...document.querySelectorAll('.rung')];
+  const cur=document.getElementById('cur'), tot=document.getElementById('tot');
+  const statusTxt=document.getElementById('statusTxt'), cornerCode=document.getElementById('cornerCode');
+  const bar=document.getElementById('bar');
+  const prevBtn=document.getElementById('prev'), nextBtn=document.getElementById('next');
+  let i=0;
+
+  // map slide index -> DEFCON rung to light (5,4,3,2,1) ; title/recap = none
+  const rungFor={1:'5',2:'4',3:'3',4:'2',5:'2',6:'2',7:'1'};
+  // digit keys jump to the main level slide
+  const digit={'5':1,'4':2,'3':3,'2':4,'1':7};
+
+  // per-level accent color applied to --lvl on stage
+  const lvlColor={'5':'var(--blue)','4':'var(--green)','3':'var(--yellow)','2':'var(--red)','1':'var(--white)','title':'var(--amber)'};
+
+  tot.textContent=String(slides.length).padStart(2,'0');
+
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(s=>s.classList.remove('active','in'));
+    const s=slides[i];
+    const lvl=s.dataset.lvl;
+    stage.style.setProperty('--lvl', lvlColor[lvl]||'var(--amber)');
+    document.documentElement.style.setProperty('--lvl', lvlColor[lvl]||'var(--amber)');
+    s.classList.add('active');
+    void s.offsetWidth;           // force reflow so entrance animations replay
+    s.classList.add('in');
+    // ladder
+    const active=rungFor[i];
+    rungs.forEach(r=>r.classList.toggle('on', r.querySelector('.n').textContent===active));
+    // readouts
+    cur.textContent=String(i+1).padStart(2,'0');
+    statusTxt.textContent=s.dataset.status||'STAND BY';
+    cornerCode.textContent=s.dataset.code||'';
+    bar.style.width=((i)/(slides.length-1)*100)+'%';
+    prevBtn.disabled=(i===0); nextBtn.disabled=(i===slides.length-1);
+  }
+
+  prevBtn.onclick=()=>show(i-1);
+  nextBtn.onclick=()=>show(i+1);
+  ladder.addEventListener('click',e=>{const r=e.target.closest('.rung'); if(r) show(+r.dataset.go);});
+
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','PageDown',' ','j'].includes(e.key)){e.preventDefault(); show(i+1);}
+    else if(['ArrowLeft','PageUp','k'].includes(e.key)){e.preventDefault(); show(i-1);}
+    else if(e.key==='Home'){show(0);}
+    else if(e.key==='End'){show(slides.length-1);}
+    else if(digit[e.key]!==undefined){show(digit[e.key]);}
+  });
+
+  show(0);
+</script>
+</body>
+</html>
